@@ -1,13 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"strings"
-	"regexp"
 	"io/ioutil"
 	"log"
 	"path/filepath"
-	"flag"
+	"regexp"
+	"strings"
 )
 
 func flatten(strings [][]string) []string {
@@ -28,21 +28,21 @@ func collect(source string, format string) []string {
 }
 
 func dirwalk(dir string) []string {
-    files, err := ioutil.ReadDir(dir)
-    if err != nil {
-        panic(err)
-    }
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		panic(err)
+	}
 
-    var paths []string
-    for _, file := range files {
-        if file.IsDir() {
-            paths = append(paths, dirwalk(filepath.Join(dir, file.Name()))...)
-            continue
-        }
-        paths = append(paths, filepath.Join(dir, file.Name()))
-    }
+	var paths []string
+	for _, file := range files {
+		if file.IsDir() {
+			paths = append(paths, dirwalk(filepath.Join(dir, file.Name()))...)
+			continue
+		}
+		paths = append(paths, filepath.Join(dir, file.Name()))
+	}
 
-    return paths
+	return paths
 }
 
 func filterString(strings []string, isIncluded func(string) bool) []string {
@@ -67,18 +67,18 @@ func content(filename string) string {
 
 func pathExtension(filename string) string {
 	components := strings.Split(filename, "/")
-	return components[len(components) - 1]
+	return components[len(components)-1]
 }
 
 func parseSwiftSource(filenames []string, format string) []string {
 	var keywords []string
 
 	for _, filename := range filenames {
-		content := content(filename)	
+		content := content(filename)
 		result := collect(content, format)
 
 		for _, r := range result {
-			keywords = append(keywords, pathExtension(filename) + "\t" + r)
+			keywords = append(keywords, pathExtension(filename)+"\t"+r)
 		}
 	}
 
@@ -95,18 +95,17 @@ func parseInterfaceBuilder(filenames []string) []string {
 		result = append(result, collect(content, `placeholder=\".+?\"`)...)
 
 		for _, r := range result {
-			keywords = append(keywords, pathExtension(filename) + "\t" + r)
+			keywords = append(keywords, pathExtension(filename)+"\t"+r)
 		}
 	}
 
 	return keywords
 }
 
-
 func main() {
-    flag.Parse()
-    args := flag.Args()
-	
+	flag.Parse()
+	args := flag.Args()
+
 	files := dirwalk(args[0])
 
 	filterFile := func(filename string) func(string) bool {
@@ -125,4 +124,3 @@ func main() {
 
 	fmt.Println(strings.Join(keywords, "\n"))
 }
-
