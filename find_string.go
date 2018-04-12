@@ -24,7 +24,14 @@ func collect(source string, format string) []string {
 	r := regexp.MustCompile(format)
 	found := r.FindAllStringSubmatch(source, -1)
 
-	return flatten(found)
+	reuslt := []string{}
+	for _, texts := range found {
+		if len(texts) >= 2 {
+			reuslt = append(reuslt, texts[1])
+		}
+	}
+
+	return reuslt
 }
 
 func dirwalk(dir string) []string {
@@ -89,10 +96,10 @@ func parseInterfaceBuilder(filenames []string) []string {
 	var keywords []string
 
 	for _, filename := range filenames {
-		content := content(filename)	
-		result := collect(content, `text=\".+?\"`)
-		result = append(result, collect(content, `title=\".+?\"`)...)
-		result = append(result, collect(content, `placeholder=\".+?\"`)...)
+		content := content(filename)
+		result := collect(content, `text=(\".+?\")`)
+		result = append(result, collect(content, `title=(\".+?\")`)...)
+		result = append(result, collect(content, `placeholder=(\".+?\")`)...)
 
 		for _, r := range result {
 			keywords = append(keywords, pathExtension(filename)+"\t"+r)
