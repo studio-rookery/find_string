@@ -26,8 +26,10 @@ func collect(source string, format string) []string {
 
 	reuslt := []string{}
 	for _, texts := range found {
-		if len(texts) >= 2 {
-			reuslt = append(reuslt, texts[1])
+		if len(texts) >= 2 && texts[1] != "\"" {
+			text := texts[1]
+			text = strings.Replace(text, "\n", "", -1)
+			reuslt = append(reuslt, text)
 		}
 	}
 
@@ -125,7 +127,8 @@ func main() {
 	storyboardNames := filterString(files, filterFile(".storyboard"))
 	xibNames := filterString(files, filterFile(".xib"))
 
-	keywords := parseSwiftSource(swiftSourcesNames, `\".+?\"`)
+	keywords := parseSwiftSource(swiftSourcesNames, `\"(.+?)\"`)
+	keywords = append(keywords, parseSwiftSource(swiftSourcesNames, `"""([\s\S]*)"""`)...)
 	keywords = append(keywords, parseInterfaceBuilder(storyboardNames)...)
 	keywords = append(keywords, parseInterfaceBuilder(xibNames)...)
 
